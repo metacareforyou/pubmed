@@ -15,6 +15,7 @@ from waitress import serve
 from Bio import Medline
 import re
 
+
 app = Flask(__name__)
 # Enable CORS for all routes and origins
 CORS(app, origins=["http://localhost:3000", 'https://metacare.ai'])
@@ -54,10 +55,10 @@ def pubmed_summary():
 
     if not question:
         return jsonify({"error": "Please provide a clinical question that is answerable with an evidence based medicine report."}), 400
-    
+    print('tranforming pico')
     pico_res = chat('rewrite the following clinical question according to the PICO model using (P), (I) , (C), (O) notation to the right of the clause:' + question )
     #print(pico_res)
-
+    print('tranformed pico')
     # Example input strings
     pico_res_new_format = "P: 49-year-old white male\nI: smoking tobacco\nC: not smoking tobacco\nO: risks"
     pico_res_original_format = "In a 49-year-old white male (P), is smoking tobacco (I) compared with not smoking tobacco (C) associated with risks (O)?"
@@ -82,6 +83,7 @@ def pubmed_summary():
         pico_variables = match_and_merge(pico_res_original_format, pattern)
 
     idList = []
+    print("searching Entrez")    
     handle = Entrez.esearch(db="mesh", term=pico_variables['Patient'])
     record = Entrez.read(handle)
     handle.close()
@@ -154,7 +156,7 @@ def pubmed_summary():
     records = Medline.parse(handle)
     records = list(records)
     handle.close()
-
+    print("searched Entrez")  
     articles = []
 
     for record in records:
@@ -176,7 +178,7 @@ def pubmed_summary():
         with torch.no_grad():
             outputs = model(**inputs)
         return outputs['pooler_output'].numpy()
-        
+    print("embedding vectors")      
     vectors = [embed_text(article[1]) for article in articles if article[1]]
     vectors = [v for v in vectors if v is not None]
     #print(f"Number of vectors: {len(vectors)}")
@@ -195,10 +197,13 @@ def pubmed_summary():
     # Define the number of nearest neighbors you want to retrieve
     if len(vectors) >= 5: k = 5
     else: k = len(vectors)
+    print("embedding complete")  
     # Search the index for the k-nearest vectors
+    print("vector search")  
     D, I = index.search(query_vector, k)
     # D contains the distances, and I contains the indices of the nearest vectors
     nearest_articles = [articles[i] for i in I[0]]  # I[0] because I is a 2D array
+    print("vector search complete")  
     #print(nearest_articles)
     # Now, print the nearest articles:
     s = ""
@@ -216,7 +221,9 @@ def pubmed_summary():
         s += f"Keywords: {keywords_str}\n"
         s += f"Mesh Terms: {mesh_terms_str}\n\n"
     # Use the GPT model to generate a summary
+    print("creating report")      
     research_res = chat_with_openai("Act as an evidenced-based clinical researcher. Using only the following PubMed Abstracts to guide your content (" + s + "), create an evidence based medicine report usig the PICO framework that answers the following PICO question: " + pico_res)
+    print("report complete")  
     summary_response = research_res
     # summary_prompt = "Summarize the key findings of the following PubMed articles:\n" + s
     # summary_response = chat_with_openai(summary_prompt)
