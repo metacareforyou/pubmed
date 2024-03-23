@@ -9,8 +9,12 @@ import numpy as np
 import faiss
 from openai import OpenAI
 from dotenv import load_dotenv
-
+import faiss
+import numpy as np
 from waitress import serve
+from Bio import Medline
+import re
+
 app = Flask(__name__)
 # Enable CORS for all routes and origins
 CORS(app, origins=["http://localhost:3000", 'https://metacare.ai'])
@@ -41,7 +45,6 @@ def chat(message):
     )
     return response.choices[0].message.content
 
-
 @app.route('/pubmedsummary', methods=['POST'])
 def pubmed_summary():
     if request.content_type == 'application/x-www-form-urlencoded':
@@ -54,8 +57,6 @@ def pubmed_summary():
     
     pico_res = chat('rewrite the following clinical question according to the PICO model using (P), (I) , (C), (O) notation to the right of the clause:' + question )
     #print(pico_res)
-
-    import re
 
     # Example input strings
     pico_res_new_format = "P: 49-year-old white male\nI: smoking tobacco\nC: not smoking tobacco\nO: risks"
@@ -149,7 +150,6 @@ def pubmed_summary():
     #print(idlist)
     #print(record['Count'])
 
-    from Bio import Medline
     handle = Entrez.efetch(db="pubmed", id=idlist, rettype="medline",retmode="text")
     records = Medline.parse(handle)
     records = list(records)
@@ -165,15 +165,9 @@ def pubmed_summary():
         abstract = record.get("AB", "?")
         keywords = record.get("OT", "?")
         mesh_terms =record.get("MH", "?")
-        articles.append((title, abstract, journal, author, date_of_publication, keywords, mesh_terms))
-    
-    #print(articles.__len__())
-    from transformers import BertTokenizer, BertModel
-    import torch
+        articles.append((title, abstract, journal, author, date_of_publication, keywords, mesh_terms))    
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    model = BertModel.from_pretrained('bert-base-uncased')
-
+  
     def embed_text(text):
         if not text:
             return None  # or return a zero vector or another placeholder
@@ -182,14 +176,10 @@ def pubmed_summary():
         with torch.no_grad():
             outputs = model(**inputs)
         return outputs['pooler_output'].numpy()
-
         
     vectors = [embed_text(article[1]) for article in articles if article[1]]
     vectors = [v for v in vectors if v is not None]
     #print(f"Number of vectors: {len(vectors)}")
-
-    import faiss
-    import numpy as np
 
     # Convert vectors list to a 2D numpy array
     vectors_matrix = np.vstack(vectors)
@@ -202,14 +192,11 @@ def pubmed_summary():
     query_vector = embed_text(query_text)
     #print(query_vector.shape)
     #print(pico_res)
-
     # Define the number of nearest neighbors you want to retrieve
     if len(vectors) >= 5: k = 5
     else: k = len(vectors)
-
     # Search the index for the k-nearest vectors
     D, I = index.search(query_vector, k)
-
     # D contains the distances, and I contains the indices of the nearest vectors
     nearest_articles = [articles[i] for i in I[0]]  # I[0] because I is a 2D array
     #print(nearest_articles)
@@ -217,12 +204,10 @@ def pubmed_summary():
     s = ""
     for idx, article in enumerate(nearest_articles):
         title, abstract, journal, authors, date_of_publication, keywords, mesh_terms = article
-
         # Convert lists to strings
         authors_str = ', '.join(authors) if authors else "N/A"
         keywords_str = ', '.join(keywords) if keywords else "N/A"
         mesh_terms_str = ', '.join(mesh_terms) if mesh_terms else "N/A"
-
         s += f"Title: {title}\n"
         s += f"Abstract: {abstract}\n"
         s += f"Journal: {journal}\n"
@@ -230,14 +215,11 @@ def pubmed_summary():
         s += f"Date of Publication: {date_of_publication}\n"
         s += f"Keywords: {keywords_str}\n"
         s += f"Mesh Terms: {mesh_terms_str}\n\n"
-
     # Use the GPT model to generate a summary
     research_res = chat_with_openai("Act as an evidenced-based clinical researcher. Using only the following PubMed Abstracts to guide your content (" + s + "), create an evidence based medicine report usig the PICO framework that answers the following PICO question: " + pico_res)
     summary_response = research_res
     # summary_prompt = "Summarize the key findings of the following PubMed articles:\n" + s
     # summary_response = chat_with_openai(summary_prompt)
-    
-
     return jsonify({
         "pico_question": pico_res,
         "articles": nearest_articles,
