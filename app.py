@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from Bio import Entrez, Medline
 import os
 import re
@@ -7,12 +8,19 @@ import torch
 import numpy as np
 import faiss
 from openai import OpenAI
+from dotenv import load_dotenv
 
+from waitress import serve
 app = Flask(__name__)
+# Enable CORS for all routes and origins
+CORS(app, origins=["http://localhost:3000", 'https://metacare.ai'])
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Environment variable configurations
-Entrez.email = ''
-openai_api_key = ''
+Entrez.email = os.getenv('ENTREZ_EMAIL')
+openai_api_key = os.getenv('OPENAI_API_KEY')
 if not Entrez.email or not openai_api_key:
     raise ValueError("Environment variables for Entrez email or OpenAI API key are not set.")
 
@@ -45,7 +53,7 @@ def pubmed_summary():
         return jsonify({"error": "Please provide a clinical question."}), 400
     
     pico_res = chat('rewrite the following clinical question according to the PICO model using (P), (I) , (C), (O) notation to the right of the clause:' + question )
-    print(pico_res)
+    #print(pico_res)
 
     import re
 
@@ -85,7 +93,7 @@ def pubmed_summary():
     query_terms = [f"{term}" for term in mesh_terms]
     query = " AND ".join(query_terms)
     p_query = query
-    print(p_query)
+    #print(p_query)
 
     handle = Entrez.esearch(db="mesh", term=pico_variables['Intervention'])
     record = Entrez.read(handle)
@@ -101,7 +109,7 @@ def pubmed_summary():
     query_terms = [f"{term}" for term in mesh_terms]
     query = " OR ".join(query_terms)
     i_query = query
-    print(i_query)
+    #print(i_query)
 
     handle = Entrez.esearch(db="mesh", term=pico_variables['Comparison'])
     record = Entrez.read(handle)
@@ -115,7 +123,7 @@ def pubmed_summary():
     query_terms = [f"{term}" for term in mesh_terms]
     query = " OR ".join(query_terms)
     c_query = query
-    print(c_query)
+    #print(c_query)
 
     handle = Entrez.esearch(db="mesh", term=pico_variables['Outcome'])
     record = Entrez.read(handle)
@@ -129,17 +137,17 @@ def pubmed_summary():
     query_terms = [f"{term}" for term in mesh_terms]
     query = " OR ".join(query_terms)
     o_query = query
-    print(o_query)
+    #print(o_query)
 
     final_query = f"({p_query}) AND ({i_query}) AND ({c_query}) AND ({o_query})"
-    print(final_query)
+    #print(final_query)
 
     handle = Entrez.esearch(db="pubmed", term=final_query)
     record = Entrez.read(handle)
     handle.close()
     idlist = record['IdList']
-    print(idlist)
-    print(record['Count'])
+    #print(idlist)
+    #print(record['Count'])
 
     from Bio import Medline
     handle = Entrez.efetch(db="pubmed", id=idlist, rettype="medline",retmode="text")
@@ -159,7 +167,7 @@ def pubmed_summary():
         mesh_terms =record.get("MH", "?")
         articles.append((title, abstract, journal, author, date_of_publication, keywords, mesh_terms))
     
-    print(articles.__len__())
+    #print(articles.__len__())
     from transformers import BertTokenizer, BertModel
     import torch
 
@@ -178,7 +186,7 @@ def pubmed_summary():
         
     vectors = [embed_text(article[1]) for article in articles if article[1]]
     vectors = [v for v in vectors if v is not None]
-    print(f"Number of vectors: {len(vectors)}")
+    #print(f"Number of vectors: {len(vectors)}")
 
     import faiss
     import numpy as np
@@ -192,8 +200,8 @@ def pubmed_summary():
 
     query_text = pico_res
     query_vector = embed_text(query_text)
-    print(query_vector.shape)
-    print(pico_res)
+    #print(query_vector.shape)
+    #print(pico_res)
 
     # Define the number of nearest neighbors you want to retrieve
     if len(vectors) >= 5: k = 5
@@ -204,7 +212,7 @@ def pubmed_summary():
 
     # D contains the distances, and I contains the indices of the nearest vectors
     nearest_articles = [articles[i] for i in I[0]]  # I[0] because I is a 2D array
-    print(nearest_articles)
+    #print(nearest_articles)
     # Now, print the nearest articles:
     s = ""
     for idx, article in enumerate(nearest_articles):
@@ -224,7 +232,7 @@ def pubmed_summary():
         s += f"Mesh Terms: {mesh_terms_str}\n\n"
 
     # Use the GPT model to generate a summary
-    research_res = chat_with_openai("Act as an evidenced-based clinical researcher. Using only the following PubMed Abstracts to guide your content (" + s + "), create an evidence based medicine report that answers the following question: " + pico_res)
+    research_res = chat_with_openai("Act as an evidenced-based clinical researcher. Using only the following PubMed Abstracts to guide your content (" + s + "), create an evidence based medicine report usig the PICO framework that answers the following PICO question: " + pico_res)
     summary_response = research_res
     # summary_prompt = "Summarize the key findings of the following PubMed articles:\n" + s
     # summary_response = chat_with_openai(summary_prompt)
@@ -244,5 +252,8 @@ def chat_with_openai(message):
     )
     return response.choices[0].message.content.strip()
 
+#if __name__ == '__main__':
+#    app.run(debug=True)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    serve(app, host='0.0.0.0', port=8080)
