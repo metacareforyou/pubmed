@@ -50,7 +50,7 @@ def pubmed_summary():
         return jsonify({"error": "Unsupported Media Type. Please use application/x-www-form-urlencoded"}), 415
 
     if not question:
-        return jsonify({"error": "Please provide a clinical question."}), 400
+        return jsonify({"error": "Please provide a clinical question that is answerable with an evidence based medicine report."}), 400
     
     pico_res = chat('rewrite the following clinical question according to the PICO model using (P), (I) , (C), (O) notation to the right of the clause:' + question )
     #print(pico_res)
