@@ -18,7 +18,7 @@ import re
 
 app = Flask(__name__)
 # Enable CORS for all routes and origins
-CORS(app, origins=["http://localhost:3000", 'https://metacare.ai'])
+CORS(app, origins=["https://metacare.ai"])
 
 # Load environment variables from .env file
 load_dotenv()
