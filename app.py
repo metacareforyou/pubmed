@@ -246,7 +246,7 @@ def chat_with_openai(message):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": message}],
-        temperature=0.5
+        temperature=0.1
     )
     return response.choices[0].message.content.strip()
 def embed_text(text):
