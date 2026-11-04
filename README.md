@@ -56,7 +56,16 @@ curl -s -X POST localhost:8080/v1/evidence -H 'content-type: application/json' \
   -d '{"question":"In adults having knee replacement, does tranexamic acid reduce transfusion?"}'
 ```
 
-Docker: `docker build -t metacare-evidence . && docker run --rm -p 8080:8080 --env-file .env metacare-evidence`.
+Local Docker, the way to test before any deploy:
+
+```sh
+scripts/run-local.sh --from-secret     # key from Secret Manager (needs gcloud auth)
+CLAUDE_API_KEY=... scripts/run-local.sh # or a key from your shell
+scripts/smoke.sh http://localhost:8090  # the 20 question acceptance run
+scripts/run-local.sh --stop
+```
+
+The key is passed into the container environment only; nothing is written to disk.
 The image runs as a non-root user.
 
 ## Deploy
