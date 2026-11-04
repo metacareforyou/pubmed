@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<PubmedArticleSet>
+<PubmedArticle>
+  <MedlineCitation Status="MEDLINE" Owner="NLM">
+    <PMID Version="1">30000001</PMID>
+    <Article PubModel="Print">
+      <Journal><ISOAbbreviation>J Arthroplasty</ISOAbbreviation><Title>The Journal of arthroplasty</Title>
+        <JournalIssue><PubDate><Year>2023</Year><Month>Mar</Month></PubDate></JournalIssue></Journal>
+      <ArticleTitle>Tranexamic acid in total knee arthroplasty: a systematic review and meta-analysis of randomized trials.</ArticleTitle>
+      <Abstract>
+        <AbstractText Label="BACKGROUND">Blood loss after total knee arthroplasty often leads to transfusion.</AbstractText>
+        <AbstractText Label="METHODS">We pooled 42 randomized controlled trials comparing tranexamic acid with placebo.</AbstractText>
+        <AbstractText Label="RESULTS">Tranexamic acid reduced the risk of transfusion (relative risk 0.45, 95% CI 0.38 to 0.53) without increasing venous thromboembolism.</AbstractText>
+        <AbstractText Label="CONCLUSIONS">Tranexamic acid is effective and safe for reducing transfusion in knee arthroplasty.</AbstractText>
+      </Abstract>
+      <AuthorList><Author><LastName>Smith</LastName><Initials>JA</Initials></Author><Author><LastName>Lee</LastName><Initials>K</Initials></Author></AuthorList>
+      <PublicationTypeList><PublicationType>Journal Article</PublicationType><PublicationType>Meta-Analysis</PublicationType><PublicationType>Systematic Review</PublicationType></PublicationTypeList>
+    </Article>
+    <MeshHeadingList><MeshHeading><DescriptorName>Tranexamic Acid</DescriptorName></MeshHeading><MeshHeading><DescriptorName>Arthroplasty, Replacement, Knee</DescriptorName></MeshHeading></MeshHeadingList>
+    <KeywordList><Keyword>transfusion</Keyword><Keyword>TXA</Keyword></KeywordList>
+  </MedlineCitation>
+  <PubmedData><ArticleIdList><ArticleId IdType="pubmed">30000001</ArticleId><ArticleId IdType="doi">10.1000/j.arth.2023.01</ArticleId><ArticleId IdType="pmc">PMC9000001</ArticleId></ArticleIdList></PubmedData>
+</PubmedArticle>
+<PubmedArticle>
+  <MedlineCitation Status="MEDLINE" Owner="NLM">
+    <PMID Version="1">30000002</PMID>
+    <Article PubModel="Print">
+      <Journal><ISOAbbreviation>Bone Joint J</ISOAbbreviation><JournalIssue><PubDate><Year>2019</Year></PubDate></JournalIssue></Journal>
+      <ArticleTitle>Intravenous versus topical tranexamic acid in primary knee replacement: a randomised controlled trial.</ArticleTitle>
+      <Abstract><AbstractText>In 180 patients, transfusion occurred in 4% of the intravenous group and 5% of the topical group. Haemoglobin drop was similar.</AbstractText></Abstract>
+      <AuthorList><Author><LastName>Garcia</LastName><Initials>M</Initials></Author></AuthorList>
+      <PublicationTypeList><PublicationType>Randomized Controlled Trial</PublicationType></PublicationTypeList>
+    </Article>
+  </MedlineCitation>
+  <PubmedData><ArticleIdList><ArticleId IdType="pubmed">30000002</ArticleId></ArticleIdList></PubmedData>
+</PubmedArticle>
+<PubmedArticle>
+  <MedlineCitation Status="MEDLINE" Owner="NLM">
+    <PMID Version="1">30000003</PMID>
+    <Article PubModel="Print">
+      <Journal><ISOAbbreviation>Knee</ISOAbbreviation><JournalIssue><PubDate><MedlineDate>2010 Jan-Feb</MedlineDate></PubDate></JournalIssue></Journal>
+      <ArticleTitle>Tranexamic acid use in a regional registry of knee arthroplasty: a retrospective cohort.</ArticleTitle>
+      <Abstract><AbstractText>Among 2,310 patients the transfusion rate was 11% with tranexamic acid and 23% without.</AbstractText></Abstract>
+      <AuthorList><Author><CollectiveName>Regional Knee Registry Group</CollectiveName></Author></AuthorList>
+      <PublicationTypeList><PublicationType>Journal Article</PublicationType></PublicationTypeList>
+    </Article>
+    <MeshHeadingList><MeshHeading><DescriptorName>Retrospective Studies</DescriptorName></MeshHeading></MeshHeadingList>
+  </MedlineCitation>
+  <PubmedData><ArticleIdList><ArticleId IdType="pubmed">30000003</ArticleId></ArticleIdList></PubmedData>
+</PubmedArticle>
+<PubmedArticle>
+  <MedlineCitation Status="MEDLINE" Owner="NLM">
+    <PMID Version="1">30000004</PMID>
+    <Article PubModel="Print">
+      <Journal><ISOAbbreviation>Case Rep Orthop</ISOAbbreviation><JournalIssue><PubDate><Year>2021</Year></PubDate></JournalIssue></Journal>
+      <ArticleTitle>Seizure after tranexamic acid during knee replacement: a case report.</ArticleTitle>
+      <Abstract><AbstractText>A 70 year old developed a seizure after a 2 g dose of tranexamic acid.</AbstractText></Abstract>
+      <PublicationTypeList><PublicationType>Case Reports</PublicationType></PublicationTypeList>
+    </Article>
+  </MedlineCitation>
+  <PubmedData><ArticleIdList><ArticleId IdType="pubmed">30000004</ArticleId></ArticleIdList></PubmedData>
+</PubmedArticle>
+<PubmedArticle>
+  <MedlineCitation Status="MEDLINE" Owner="NLM">
+    <PMID Version="1">30000005</PMID>
+    <Article PubModel="Print">
+      <Journal><ISOAbbreviation>No Abstract J</ISOAbbreviation><JournalIssue><PubDate><Year>2022</Year></PubDate></JournalIssue></Journal>
+      <ArticleTitle>An editorial with no abstract.</ArticleTitle>
+      <PublicationTypeList><PublicationType>Editorial</PublicationType></PublicationTypeList>
+    </Article>
+  </MedlineCitation>
+</PubmedArticle>
+</PubmedArticleSet>

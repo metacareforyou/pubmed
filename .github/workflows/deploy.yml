@@ -1,0 +1,76 @@
+name: deploy
+
+# Builds the image and points the Cloud Run service at it:
+#   develop -> metacare-evidence-stage (GitHub environment "stage")
+#   main    -> metacare-evidence       (GitHub environment "production")
+# Same shape as metacare-gpt-backend's workflow. The service's runtime settings
+# (environment, secrets, scaling) are not touched: only the image changes.
+# Needs repository variables GCP_PROJECT_ID, GCP_WORKLOAD_IDENTITY_PROVIDER and
+# GCP_PUBLISHER_SERVICE_ACCOUNT, and this repository admitted to the pool in
+# metacare-shared-services (app-publishers.tf, key "evidence").
+
+on:
+  push:
+    branches: [develop, main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: build, push, point the service at it
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'stage' }}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      SERVICE: ${{ github.ref == 'refs/heads/main' && 'metacare-evidence' || 'metacare-evidence-stage' }}
+      REGION: us-central1
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      IMAGE: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/shared-containers/metacare-evidence:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: the environment is configured
+        env:
+          V_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          V_ACCOUNT: ${{ vars.GCP_PUBLISHER_SERVICE_ACCOUNT }}
+        run: |
+          for v in PROJECT V_PROVIDER V_ACCOUNT; do
+            [ -n "${!v}" ] || { echo "$v is unset: GCP_PROJECT_ID, GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_PUBLISHER_SERVICE_ACCOUNT must be repository variables"; exit 1; }
+          done
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_PUBLISHER_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: build and push
+        run: |
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: point the service at the new image
+        run: |
+          gcloud run services update "$SERVICE" --project="$PROJECT" --region="$REGION" --image="$IMAGE"
+
+      - name: confirm what is serving
+        run: |
+          DESC=$(gcloud run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" \
+                   --format='value(status.url,spec.template.spec.containers[0].image)')
+          URL=$(echo "$DESC" | cut -f1)
+          LIVE=$(echo "$DESC" | cut -f2)
+          test "$LIVE" = "$IMAGE" || { echo "live image is $LIVE"; exit 1; }
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' "$URL/healthz")
+          test "$CODE" = "200" || { echo "$URL/healthz answered $CODE"; exit 1; }
+          echo "live at $URL"

@@ -1,11 +1,6 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-Flask==2.3.2
-Flask-Cors==4.0.0
-openai==1.14.2
-biopython==1.79
-transformers==4.18.0
-torch==2.2.1
-numpy==1.22.3
-faiss-cpu==1.7.2
-waitress==3.0.0
-python-dotenv==1.0.1
+anthropic==2.4.0
+Flask==3.1.3
+flask-cors==6.0.5
+requests==2.34.2
+waitress==3.0.2
+python-dotenv==1.2.1

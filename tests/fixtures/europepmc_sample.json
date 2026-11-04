@@ -1,0 +1,11 @@
+{"hitCount": 2, "resultList": {"result": [
+ {"id": "30000001", "source": "MED", "pmid": "30000001", "pmcid": "PMC9000001", "doi": "10.1000/j.arth.2023.01",
+  "title": "Tranexamic acid in total knee arthroplasty: a systematic review and meta-analysis of randomized trials.",
+  "authorString": "Smith JA, Lee K.", "journalTitle": "J Arthroplasty", "pubYear": "2023",
+  "abstractText": "Tranexamic acid reduced the risk of transfusion (relative risk 0.45, 95% CI 0.38 to 0.53).",
+  "pubTypeList": {"pubType": ["Meta-Analysis", "Systematic Review"]},
+  "meshHeadingList": {"meshHeading": [{"descriptorName": "Tranexamic Acid"}]},
+  "keywordList": {"keyword": ["transfusion"]}},
+ {"id": "PPR1", "source": "PPR", "title": "A preprint without a PMID", "abstractText": "ignored"},
+ {"id": "30000002", "source": "MED", "pmid": "30000002", "title": "Intravenous versus topical tranexamic acid.", "pubYear": "bad", "abstractText": "In 180 patients, transfusion occurred in 4%."}
+]}}
