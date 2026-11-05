@@ -40,6 +40,17 @@ def test_auth_error_becomes_llm_unavailable(fake_claude_factory):
         llm.extract_pico(fake_claude_factory([err]), "m", "q", Deadline(30))
 
 
+def test_billing_400_is_unavailable_with_reason(fake_claude_factory):
+    import httpx2
+    req = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+    body = {"type": "error", "error": {"type": "invalid_request_error",
+            "message": "Your credit balance is too low to access the Anthropic API."}}
+    err = anthropic.BadRequestError("bad", response=httpx2.Response(400, request=req), body=body)
+    with pytest.raises(llm.LlmUnavailable) as info:
+        llm.extract_pico(fake_claude_factory([err]), "m", "q", Deadline(30))
+    assert "400 invalid_request_error: Your credit balance is too low" in str(info.value)
+
+
 def test_synthesize_parses_findings(fake_claude_factory, synthesis_payload, articles):
     pico = Pico(PicoElement("p"), PicoElement("i"), PicoElement(""), PicoElement("o"))
     s = llm.synthesize(fake_claude_factory([synthesis_payload]), "m", pico, articles[:2], Deadline(30))

@@ -219,6 +219,22 @@ def synthesize(client: anthropic.Anthropic, model: str, pico: Pico, articles: li
 # Shared call
 # ---------------------------------------------------------------------------
 
+def _error_detail(exc) -> str:
+    """Anthropic's error type and message, which never contain the question.
+
+    Billing problems arrive as 400 invalid_request_error with a plain message
+    ("Your credit balance is too low..."), so the status code alone is not
+    enough to act on.
+    """
+    body = getattr(exc, "body", None)
+    err = body.get("error") if isinstance(body, dict) else None
+    if not isinstance(err, dict):
+        return ""
+    kind = err.get("type") or ""
+    message = (err.get("message") or "")[:200].replace("\n", " ")
+    return f"{kind}: {message}".strip(": ")
+
+
 def _structured_call(client: anthropic.Anthropic, *, model: str, system: str, user: str, schema: dict,
                      max_tokens: int, effort: str, timeout: float) -> dict[str, Any] | None:
     try:
@@ -240,7 +256,7 @@ def _structured_call(client: anthropic.Anthropic, *, model: str, system: str, us
     except anthropic.APITimeoutError as exc:
         raise LlmUnavailable("claude timed out") from exc
     except anthropic.APIStatusError as exc:
-        raise LlmUnavailable(f"claude returned {exc.status_code}") from exc
+        raise LlmUnavailable(f"claude returned {exc.status_code} {_error_detail(exc)}") from exc
     except anthropic.APIConnectionError as exc:
         raise LlmUnavailable("claude unreachable") from exc
 
